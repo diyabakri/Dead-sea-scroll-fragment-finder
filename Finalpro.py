@@ -12,22 +12,15 @@ import skimage.measure as me
 def main():
     
 
-    imreader = FileReader("./results/image0","s*2.jpg")
+    imreader = FileReader("./data","*.jpg")
     imList = imreader.getImages()
     prep = SegPrep(imList)
 
     prep.itrBilateralSmoothing(itrations=2)
-
-    prep.changeColorSpace(colorReagons=100)
-    prep.changeColorSpace(colorReagons=50)
-    prep.changeColorSpace(colorReagons=25)
-    prep.changeColorSpace(colorReagons=10)
-    prep.changeColorSpace(colorReagons=8)
-    prep.changeColorSpace(colorReagons=5)
-    prep.changeColorSpace(colorReagons=4)
+    prep.colorSpacePyramid()
     # prep.morphEadgeDetection()
     # prep.cannyEadgedetection()
-    prep.adaptiveThreshold()
+    # prep.adaptiveThreshold()
     # prep.findBorders()
     # prep.foodFill()
     # prep.clearBoarders()
@@ -39,7 +32,6 @@ def main():
     # dataFrameTable = prep.sortRegionsInImage(validregionTable)
     # prep.drawRec(dataFrameTable)
     # prep.cropRecFromPhoto(dataFrameTable)
-    # prep.saveImage()
 
 
     for i in range(len(imList)):

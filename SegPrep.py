@@ -55,7 +55,7 @@ class SegPrep:
         self.prevResults = self.reginlaFillingImgaes.copy()
         return self.prevResults.copy()
              
-    def itrBilateralSmoothing(self,imageList=None ,selem=disk(60),s0=150,s1=150,itrations = 1):
+    def itrBilateralSmoothing(self,imageList=None ,footprint=disk(60),s0=150,s1=150,itrations = 1):
         if(imageList == None):
             imageList = self.prevResults.copy() 
         self.smoothedImages = imageList.copy()
@@ -122,10 +122,10 @@ class SegPrep:
         for i in range (len(self.morphedImages)):
             # closing = self.morphedImages[i]
             
-            # close = mp.closing(self.morphedImages[i],selem=closingKernal)
-            erode = mp.erosion(self.morphedImages[i],selem = erodeKernal).astype(np.uint8)
-            erode = mp.erosion(erode,selem = erodeKernal).astype(np.uint8)
-            dilate = mp.erosion(self.morphedImages[i],selem = dilatKernal,).astype(np.uint8)
+            # close = mp.closing(self.morphedImages[i],footprint=closingKernal)
+            erode = mp.erosion(self.morphedImages[i],footprint=  erodeKernal).astype(np.uint8)
+            erode = mp.erosion(erode,footprint= erodeKernal).astype(np.uint8)
+            dilate = mp.erosion(self.morphedImages[i],footprint= dilatKernal,).astype(np.uint8)
             edge = dilate - erode
 
             # edge = mp.opening(edge).astype(np.uint8)
@@ -152,7 +152,7 @@ class SegPrep:
         self.prevResults = self.borderImgaes.copy()
         return self.prevResults.copy()
                 
-    def foodFill(self, imageList = None , seed_point=(0,0) , new_value=255 , selem=None, connectivity=None, tolerance=None, in_place=False, inplace=None):
+    def foodFill(self, imageList = None , seed_point=(0,0) , new_value=255 , footprint=None, connectivity=None, tolerance=None, in_place=False, inplace=None):
         if(imageList == None):
             imageList = self.prevResults.copy()
         self.filledImgaes = imageList.copy()
@@ -180,7 +180,7 @@ class SegPrep:
         if (imageList == None):
             imageList = self.prevResults.copy()
         for i in range(len(imageList)):
-            self.prevResults[i] = mp.erosion(imageList[i], selem=disk(disk_size)).astype(np.uint8)
+            self.prevResults[i] = mp.erosion(imageList[i], footprint=disk(disk_size)).astype(np.uint8)
         return self.prevResults.copy()
 
     def open(self, imageList=None, disk_size=4):
@@ -188,7 +188,7 @@ class SegPrep:
             imageList = self.prevResults.copy()
 
         for i in range(len(imageList)):
-            self.prevResults[i] = mp.opening(imageList[i], selem=disk(disk_size)).astype(np.uint8)
+            self.prevResults[i] = mp.opening(imageList[i], footprint=disk(disk_size)).astype(np.uint8)
         return self.prevResults.copy()
 
     def close(self, imageList=None, disk_size=4):
@@ -196,7 +196,7 @@ class SegPrep:
             imageList = self.prevResults.copy()
 
         for i in range(len(imageList)):
-            self.prevResults[i] = mp.closing(imageList[i], selem=disk(disk_size)).astype(np.uint8)
+            self.prevResults[i] = mp.closing(imageList[i], footprint=disk(disk_size)).astype(np.uint8)
         return self.prevResults.copy()
 
     def whiteTopHat(self, imageList=None, disk_size=4):
@@ -204,7 +204,7 @@ class SegPrep:
             imageList = self.prevResults.copy()
 
         for i in range(len(imageList)):
-            self.prevResults[i] = mp.white_tophat(imageList[i], selem=disk(disk_size)).astype(np.uint8)
+            self.prevResults[i] = mp.white_tophat(imageList[i], footprint=disk(disk_size)).astype(np.uint8)
         return self.prevResults.copy()
 
     def label(self, imageList=None):
@@ -351,3 +351,10 @@ class SegPrep:
                         cropSlice[r,c] = currImage[r,c]
                 
                 io.imsave("./results/image%d/slice%d.jpg"%(i,j+1),cropSlice)
+
+    def colorSpacePyramid(self,imageList = None , pyramid = [100,50,25,10,8,5,4]):
+        if(imageList == None):
+            imageList = self.prevResults.copy()
+        for i in range(len(imageList)):
+            self.changeColorSpace(imageList,pyramid[i])
+        return self.prevResults.copy()
