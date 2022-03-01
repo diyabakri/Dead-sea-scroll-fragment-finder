@@ -43,7 +43,7 @@ class SegPrep:
         if(imageList == None):
             imageList = self.prevResults.copy()
         self.reginlaFillingImgaes = imageList.copy()
-        self.foodFill(imageList = imageList.copy())
+        self.floodFill(imageList = imageList.copy())
 
         for i in range(len(self.reginlaFillingImgaes)):
             invrimage = np.where(self.prevResults[i]>0,0,255)

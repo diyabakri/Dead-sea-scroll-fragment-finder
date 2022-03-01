@@ -7,7 +7,7 @@ def main():
     imList = imreader.getImages()
     prep = SegPrep(imList)
 
-    prep.itrBilateralSmoothing(itrations=2)
+    prep.itrSmoothing(itrations=2)
     prep.colorSpacePyramid()
     prep.morphEadgeDetection()
     prep.findBorders()
