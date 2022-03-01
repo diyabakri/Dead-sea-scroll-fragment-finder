@@ -18,6 +18,7 @@ import skimage.io as io
 from skimage.color import rgb2gray
 from pathlib import Path
 from openpyxl import load_workbook
+from skimage import measure
 
 class SegPrep:
 
@@ -321,3 +322,32 @@ class SegPrep:
             writer.close()
         else:
             dataframe.to_excel(path ,sheet_name =sheetName , index =False )
+
+
+    def validregionImage(self, validregionTable,imageList=None ):
+        if (imageList == None):
+            imageList = self.prevResults.copy()
+        imList = [None] *  len(validregionTable)
+        for i in range(len(validregionTable)):
+            imList[i] = np.zeros(self.orignalImages[i].shape)
+            for j in  validregionTable[i]:
+                for x, y in j.coords:
+                    imList[i][x][y] = 255
+        return imList
+
+
+    def drawcontor(self ,imageList=None):
+        if (imageList == None):
+            imageList = self.prevResults.copy()
+        for index , i in  enumerate(imageList):
+            contours = measure.find_contours(i, 0.9)
+            fig, ax = plt.subplots()
+            ax.imshow(self.orignalImages[index], cmap=plt.cm.gray)
+            for contour in contours:
+                ax.plot(contour[:, 1], contour[:, 0], linewidth=2)
+            ax.axis('image')
+            ax.set_xticks([])
+            ax.set_yticks([])
+            ax.set_axis_off()
+            plt.tight_layout()
+            plt.savefig("./results/image%i.jpg" % (index))
