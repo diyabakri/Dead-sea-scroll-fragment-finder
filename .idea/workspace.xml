@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c689d67-c1db-4f52-be46-2fe2e7eede4d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Finalpro.py" beforeDir="false" afterPath="$PROJECT_DIR$/Finalpro.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SegPrep.py" beforeDir="false" afterPath="$PROJECT_DIR$/SegPrep.py" afterDir="false" />
     </list>
@@ -87,7 +88,7 @@
       <option name="presentableId" value="Default" />
       <updated>1646122796607</updated>
       <workItem from="1646122798610" duration="1015000" />
-      <workItem from="1646123828045" duration="2856000" />
+      <workItem from="1646123828045" duration="4870000" />
     </task>
     <servers />
   </component>
