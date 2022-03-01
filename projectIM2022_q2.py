@@ -3,7 +3,7 @@ from SegPrep import SegPrep
 import skimage.io as io
 
 def main():
-    imreader = FileReader("./data","*.jpg")
+    imreader = FileReader("./images","*.jpg")
     imList = imreader.getImages()
     prep = SegPrep(imList)
 
