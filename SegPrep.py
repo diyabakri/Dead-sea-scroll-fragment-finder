@@ -19,7 +19,6 @@ from skimage.color import rgb2gray
 from pathlib import Path
 from openpyxl import load_workbook
 
-
 class SegPrep:
 
     orignalImages:ArrayType
@@ -39,11 +38,6 @@ class SegPrep:
     def __init__(self,orignalImages:ArrayType):
         self.orignalImages = orignalImages
         self.prevResults = orignalImages.copy()
-        self.colored_image = orignalImages.copy()
-        self.dict = {}
-        self.df = pd.DataFrame(data=self.dict)
-        self.coord_df = pd.DataFrame(data=self.dict)
-        self.slices= []
     
     def reginalfilling(self,imageList=None):
         if(imageList == None):
@@ -58,34 +52,17 @@ class SegPrep:
         self.prevResults = self.reginlaFillingImgaes.copy()
         return self.prevResults.copy()
              
-    def itrBilateralSmoothing(self,imageList=None ,selem=disk(60),s0=150,s1=150,itrations = 1):
+    def itrSmoothing(self,imageList=None ,kernalSize = 5,itrations = 1):
+        
         if(imageList == None):
             imageList = self.prevResults.copy() 
         self.smoothedImages = imageList.copy()
+        
         for i in range(len(self.smoothedImages)):            
             for j in range(itrations):
-                self.smoothedImages[i] = cv2.blur(self.smoothedImages[i],(5,5),cv2.CV_32FC2)
-                # self.smoothedImages[i] = rank.mean_bilateral(self.smoothedImages[i],selem = selem , s0=s0 , s1 = s1)
+                self.smoothedImages[i] = cv2.blur(self.smoothedImages[i],(kernalSize,kernalSize),cv2.CV_32FC2)
+        
         self.prevResults = self.smoothedImages.copy()
-        return self.prevResults.copy()
-
-    def hogTrans(self,imageList = None ,orientations=8, pixels_per_cell=(8, 8),cells_per_block=(1, 1), visualize=True):
-        if(imageList == None):
-            imageList = self.prevResults.copy()
-        self.hogImages = imageList.copy()
-        for i in range(len(imageList)):
-            self.hogImages[i] = hog(self.hogImages[i],orientations=orientations,pixels_per_cell=pixels_per_cell,cells_per_block=cells_per_block,visualize=visualize)
-        self.prevResults = self.hogImages.copy()
-        return self.prevResults.copy()
-
-    def adaptiveThreshold(self,imageList = None,block_size = 35, method='gaussian', offset=10, mode='reflect', param=None, cval=0):
-        if(imageList == None):
-            imageList = self.prevResults.copy()
-        self.binaryImages = imageList.copy()
-        for i in range(len(self.binaryImages)):
-            self.binaryImages[i] = cv2.adaptiveThreshold(self.binaryImages[i],255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,25,1)
-            self.binaryImages[i].astype(np.uint8)
-        self.prevResults = self.binaryImages.copy()
         return self.prevResults.copy()
 
     def changeColorSpace(self,imageList = None , colorReagons = 8):
@@ -136,16 +113,6 @@ class SegPrep:
         self.prevResults = self.morphedImages.copy()
         return self.prevResults.copy()
 
-    def cannyEadgedetection(self,imageList = None,sigma = 1):
-        if(imageList == None):
-            imageList = self.prevResults.copy()
-        self.cannyImages = imageList.copy()
-        for i in range(len(self.cannyImages)):
-            self.cannyImages[i] = canny(imageList[i],sigma=sigma).astype(np.uint8)
-            self.cannyImages[i]*=255
-        self.prevResults = self.cannyImages.copy()
-        return self.prevResults.copy()
-        
     def findBorders(self,imageList = None , connectivity=1, mode='thick', background=0):
         if(imageList == None):
             imageList = self.prevResults.copy()
@@ -155,7 +122,7 @@ class SegPrep:
         self.prevResults = self.borderImgaes.copy()
         return self.prevResults.copy()
                 
-    def foodFill(self, imageList = None , seed_point=(0,0) , new_value=255 , selem=None, connectivity=None, tolerance=None, in_place=False, inplace=None):
+    def floodFill(self, imageList = None , seed_point=(0,0) , new_value=255 , selem=None, connectivity=None, tolerance=None, in_place=False, inplace=None):
         if(imageList == None):
             imageList = self.prevResults.copy()
         self.filledImgaes = imageList.copy()
@@ -202,14 +169,6 @@ class SegPrep:
             self.prevResults[i] = mp.closing(imageList[i], selem=disk(disk_size)).astype(np.uint8)
         return self.prevResults.copy()
 
-    def whiteTopHat(self, imageList=None, disk_size=4):
-        if (imageList == None):
-            imageList = self.prevResults.copy()
-
-        for i in range(len(imageList)):
-            self.prevResults[i] = mp.white_tophat(imageList[i], selem=disk(disk_size)).astype(np.uint8)
-        return self.prevResults.copy()
-
     def label(self, imageList=None):
         if (imageList == None):
             imageList = self.prevResults.copy()
@@ -218,18 +177,18 @@ class SegPrep:
             self.prevResults[i] = me.label(imageList[i])
         return self.prevResults.copy()
 
-    def sortRegionsInImage(self , regionBoxTable):
+    def sortRegionsInImage(self , regionTable):
 
         dataFrames = []
 
-        for i in range(len(regionBoxTable)):
+        for i in range(len(regionTable)):
 
             dict = {'up left X': [], 'up left Y': [], 'down right X': [], 'down right Y': [],"distance": []}
             df = pd.DataFrame(data=dict)
             
-            for index, box in enumerate(regionBoxTable[i]):
+            for index, region in enumerate(regionTable[i]):
             
-                    minr, minc, maxr, maxc = box
+                    minr, minc, maxr, maxc = region.bbox
             
                     distance_from_zero = ((minr) ** 2 + (minc) ** 2) ** (1 / 2)
             
@@ -272,10 +231,10 @@ class SegPrep:
 
                     minr, minc, maxr, maxc = region.bbox
             
-                    if ((maxc - minc) / (maxr - minr)) > 5 or (maxr - minr) /(maxc - minc) > 4.5:
+                    if ((maxc - minc) / (maxr - minr)) > 5 or (maxr - minr) /(maxc - minc) > 4.5:# aspect ratio distorted
                         continue
                     
-                    validRegions.append([minr, minc, maxr, maxc])
+                    validRegions.append(region)
             
             validRegionTable.append(validRegions)
         
@@ -309,26 +268,6 @@ class SegPrep:
             plt.tight_layout()
             plt.savefig("./results/image%i/image%i.jpg"%(i,i))
 
-    def saveImageNoRectangle(self ,imageList=None  ,part_name=''):
-        
-        if (imageList == None):
-            imageList = self.prevResults.copy()
-
-        for i in range(len(imageList)):
-            io.imsave("./results/image%d/image%d%s.jpg" % (i  ,i,part_name), self.prevResults[i])
-
-    def fullSizeImageWithTheSlice(self ,i,serial , minr , minc , maxr , maxc ):
-
-        new_image =np.zeros(self.orignalImages[i].shape)
-
-        for row in range(minr, maxr):
-
-            for col in range(minc , maxc):
-
-                new_image[row , col] = self.orignalImages[i][row,col]
-
-        io.imsave("./slice/image%d/image%d%s.jpg" % (i, i,serial), new_image)
-
     def cropRecFromPhoto(self,dataFrameTable,imageList = None):
         if (imageList == None):
             imageList = self.orignalImages.copy()
@@ -356,10 +295,15 @@ class SegPrep:
                 io.imsave("./results/image%d/slice%d.jpg"%(i,j+1),cropSlice)
 
     def colorSpacePyramid(self,imageList = None , pyramid = [100,50,25,10,8,5,4]):
+
         if(imageList == None):
+
             imageList = self.prevResults.copy()
+
         for i in range(len(pyramid)):
-            self.prevResults = self.changeColorSpace(colorReagons = pyramid[i])
+
+            self.prevResults = self.changeColorSpace(imageList=imageList,colorReagons = pyramid[i])
+        
         return self.prevResults.copy()
     
     def dataframeIntoCsv(self ,dataframe ,  name):
