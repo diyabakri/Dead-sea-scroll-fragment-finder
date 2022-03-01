@@ -16,6 +16,9 @@ import matplotlib.patches as mpatches
 import pandas as pd
 import skimage.io as io
 from skimage.color import rgb2gray
+from pathlib import Path
+from openpyxl import load_workbook
+
 
 class SegPrep:
 
@@ -358,3 +361,19 @@ class SegPrep:
         for i in range(len(pyramid)):
             self.prevResults = self.changeColorSpace(colorReagons = pyramid[i])
         return self.prevResults.copy()
+    
+    def dataframeIntoCsv(self ,dataframe ,  name):
+        dataframe.to_csv('excel/{}.csv'.format(name), index=False, header=False)
+
+    def dataframeIntoExcel(self, dataframe , sheetName, fileName):
+        path = "excel/{}.xlsx".format(fileName)
+        my_file = Path('excel/{}.xlsx'.format(fileName))
+        if my_file.is_file():
+            book = load_workbook(path)
+            writer = pd.ExcelWriter(path, engine='openpyxl')
+            writer.book = book
+            dataframe.to_excel(writer, sheet_name=sheetName, index =False)
+            writer.save()
+            writer.close()
+        else:
+            dataframe.to_excel(path ,sheet_name =sheetName , index =False )

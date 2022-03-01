@@ -8,10 +8,8 @@ import numpy as np
 import cv2
 import skimage.morphology as mp
 import skimage.measure as me
-
+import pandas as pd
 def main():
-    
-
     imreader = FileReader("./data","*.jpg")
     imList = imreader.getImages()
     prep = SegPrep(imList)
@@ -19,14 +17,14 @@ def main():
     prep.itrBilateralSmoothing(itrations=2)
     prep.colorSpacePyramid()
     prep.morphEadgeDetection()
-    # prep.cannyEadgedetection()
-    # prep.adaptiveThreshold()
+    prep.cannyEadgedetection()
+    prep.adaptiveThreshold()
     prep.findBorders()
     prep.foodFill()
     prep.clearBoarders()
     prep.reginalfilling()
     prep.clearBoarders(buffer_size=220)
-    # prep.label()
+    prep.label()
     # regionTable = prep.getRegionProps()
     # validregionTable = prep.getValidRegions(regionTable,minArea=10000)
     # dataFrameTable = prep.sortRegionsInImage(validregionTable)
